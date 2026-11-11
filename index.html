@@ -31,7 +31,7 @@
   --green:#3fe08f;
   --red:#ff5f7a;
   --blue:#5ea2ff;
-  --grad:linear-gradient(120deg,#2ee6ff 0%,#8b7bff 55%,#ff5f9e 125%);
+  --grad:linear-gradient(120deg,var(--cyan) 0%,var(--violet) 55%,var(--magenta) 125%);
   --grad-soft:linear-gradient(120deg,rgba(46,230,255,.16),rgba(139,123,255,.16) 55%,rgba(255,95,158,.14));
   --font-body:'Inter','Segoe UI',system-ui,sans-serif;
   --font-display:'Space Grotesk','Inter',system-ui,sans-serif;
@@ -1297,6 +1297,10 @@ footer{border-top:1px solid var(--line);padding:54px 0 30px;background:rgba(4,7,
         <input type="text" id="adminLogoText">
       </div>
       <div class="admin-field">
+        <label for="adminProBadgeText">Logo PRO badge text</label>
+        <input type="text" id="adminProBadgeText">
+      </div>
+      <div class="admin-field">
         <label for="adminTelegram">Telegram channel link</label>
         <input type="url" id="adminTelegram">
       </div>
@@ -1305,8 +1309,20 @@ footer{border-top:1px solid var(--line);padding:54px 0 30px;background:rgba(4,7,
         <input type="url" id="adminYoutube">
       </div>
       <div class="admin-field">
-        <label for="adminThemeColor">Theme color</label>
+        <label for="adminThemeColor">Primary color</label>
         <input type="color" id="adminThemeColor">
+      </div>
+      <div class="admin-field">
+        <label for="adminGradientColor">Gradient color 2</label>
+        <input type="color" id="adminGradientColor">
+      </div>
+      <div class="admin-field">
+        <label for="adminAccentColor">Accent color</label>
+        <input type="color" id="adminAccentColor">
+      </div>
+      <div class="admin-field">
+        <label for="adminBackgroundColor">Background color</label>
+        <input type="color" id="adminBackgroundColor">
       </div>
       <div class="admin-field">
         <label for="adminNewPassword">New admin password (leave blank to keep current)</label>
@@ -1360,9 +1376,13 @@ const DEFAULT_ADMIN = {
   siteName: 'Tonmoy Developer',
   footerCredit: 'Tonmoy Developer',
   logoText: 'MailVault',
+  proBadgeText: 'PRO',
   telegram: 'https://t.me/TonmoyDeveloperBD24',
   youtube: 'https://www.youtube.com/@TonmoyDeveloperBD24',
   themeColor: '#2ee6ff',
+  gradientColor: '#8b7bff',
+  accentColor: '#ff5f9e',
+  backgroundColor: '#05080f',
   adminPassword: 'admin123'
 };
 function loadAdminSettings() {
@@ -1388,15 +1408,26 @@ function applyAdminSettings(s) {
   if (tg) tg.href = s.telegram;
   const yt = $('#footerYoutubeLink');
   if (yt) yt.href = s.youtube;
+  if (s.proBadgeText) {
+    $$('.pro-pill').forEach(el => { el.textContent = s.proBadgeText; });
+    $$('.boot-name .pro').forEach(el => { el.textContent = s.proBadgeText; });
+  }
   if (s.themeColor) document.documentElement.style.setProperty('--cyan', s.themeColor);
+  if (s.gradientColor) document.documentElement.style.setProperty('--violet', s.gradientColor);
+  if (s.accentColor) document.documentElement.style.setProperty('--magenta', s.accentColor);
+  if (s.backgroundColor) document.documentElement.style.setProperty('--bg', s.backgroundColor);
 }
 function fillAdminForm(s) {
   $('#adminSiteName').value = s.siteName;
   $('#adminFooterCredit').value = s.footerCredit;
   $('#adminLogoText').value = s.logoText;
+  $('#adminProBadgeText').value = s.proBadgeText;
   $('#adminTelegram').value = s.telegram;
   $('#adminYoutube').value = s.youtube;
   $('#adminThemeColor').value = s.themeColor;
+  $('#adminGradientColor').value = s.gradientColor;
+  $('#adminAccentColor').value = s.accentColor;
+  $('#adminBackgroundColor').value = s.backgroundColor;
   $('#adminNewPassword').value = '';
 }
 function openAdmin() {
@@ -2170,9 +2201,13 @@ function bindUI() {
     s.siteName = $('#adminSiteName').value.trim() || DEFAULT_ADMIN.siteName;
     s.footerCredit = $('#adminFooterCredit').value.trim() || DEFAULT_ADMIN.footerCredit;
     s.logoText = $('#adminLogoText').value.trim() || DEFAULT_ADMIN.logoText;
+    s.proBadgeText = $('#adminProBadgeText').value.trim() || DEFAULT_ADMIN.proBadgeText;
     s.telegram = $('#adminTelegram').value.trim() || DEFAULT_ADMIN.telegram;
     s.youtube = $('#adminYoutube').value.trim() || DEFAULT_ADMIN.youtube;
     s.themeColor = $('#adminThemeColor').value || DEFAULT_ADMIN.themeColor;
+    s.gradientColor = $('#adminGradientColor').value || DEFAULT_ADMIN.gradientColor;
+    s.accentColor = $('#adminAccentColor').value || DEFAULT_ADMIN.accentColor;
+    s.backgroundColor = $('#adminBackgroundColor').value || DEFAULT_ADMIN.backgroundColor;
     const newPass = $('#adminNewPassword').value.trim();
     if (newPass) s.adminPassword = newPass;
     saveAdminSettings(s);
