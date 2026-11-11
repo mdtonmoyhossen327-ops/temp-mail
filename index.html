@@ -1762,7 +1762,6 @@ async function refreshInbox(manual = false) {
     updateEmpty();
   } finally {
     refreshing = false;
-    remaining = REFRESH_SECS;
     updateRing();
     $('#inboxCard').classList.remove('refreshing');
     $('#refreshBtn').classList.remove('spinning');
@@ -2284,9 +2283,6 @@ function bindUI() {
     else if (k === 'n') newAddress();
   });
   document.addEventListener('pointerdown', ensureAudio, { once: true });
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && account) { remaining = 1; }
-  });
   window.addEventListener('online', () => { setStatus(true); if (account) refreshInbox(true); toast('Back online', 'success'); });
   window.addEventListener('offline', () => { setStatus(false); toast('Internet connection lost', 'error'); });
   window.addEventListener('scroll', () => { $('#nav').classList.toggle('scrolled', window.scrollY > 12); }, { passive: true });
@@ -2296,10 +2292,13 @@ function bindUI() {
 function tick() {
   if (!account) return;
   updateTimes();
-  if (autoRefresh && !document.hidden && !refreshing && !creating) {
+  if (autoRefresh && !document.hidden) {
     remaining--;
-    if (remaining <= 0) refreshInbox(false);
-    else updateRing();
+    if (remaining <= 0) {
+      remaining = REFRESH_SECS;
+      updateRing();
+      refreshInbox(false);
+    } else updateRing();
   }
 }
 
