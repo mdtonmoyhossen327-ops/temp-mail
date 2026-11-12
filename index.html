@@ -235,6 +235,7 @@ kbd{
 }
 .brand:hover .brand-logo{transform:rotate(-6deg) scale(1.06);box-shadow:0 6px 24px rgba(46,230,255,.32)}
 .brand-logo svg{width:21px;height:21px}
+.brand-logo img{width:37px;height:37px;object-fit:cover;border-radius:11px}
 .brand-name{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.3px}
 .brand-name em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .pro-pill{
@@ -1297,6 +1298,17 @@ footer{border-top:1px solid var(--line);padding:54px 0 30px;background:rgba(4,7,
         <input type="text" id="adminLogoText">
       </div>
       <div class="admin-field">
+        <label for="adminLogoImage">Logo image (URL or upload)</label>
+        <input type="text" id="adminLogoImage" placeholder="https://.../logo.png — or upload below">
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <label class="btn btn-ghost" for="adminLogoFile" style="cursor:pointer">Upload logo</label>
+          <input type="file" id="adminLogoFile" accept="image/*" hidden>
+          <button class="btn btn-ghost" id="adminLogoRemove" type="button">Remove logo</button>
+          <img id="adminLogoPreview" alt="Logo preview" style="width:37px;height:37px;object-fit:cover;border-radius:9px;display:none">
+        </div>
+        <small style="color:var(--muted)">Small logo works best (under 200 KB). Saved in this browser only.</small>
+      </div>
+      <div class="admin-field">
         <label for="adminProBadgeText">Logo PRO badge text</label>
         <input type="text" id="adminProBadgeText">
       </div>
@@ -1376,6 +1388,7 @@ const DEFAULT_ADMIN = {
   siteName: 'Tonmoy Developer',
   footerCredit: 'Tonmoy Developer',
   logoText: 'MailVault',
+  logoImage: '',
   proBadgeText: 'PRO',
   telegram: 'https://t.me/TonmoyDeveloperBD24',
   youtube: 'https://www.youtube.com/@TonmoyDeveloperBD24',
@@ -1404,6 +1417,14 @@ function applyAdminSettings(s) {
   if (s.logoText && s.logoText !== 'MailVault') {
     $$('.brand-name').forEach(el => { el.textContent = s.logoText; });
   }
+  $$('.brand-logo').forEach(el => {
+    if (!el.dataset.origHtml) el.dataset.origHtml = el.innerHTML;
+    if (s.logoImage) {
+      el.innerHTML = '<img src="' + String(s.logoImage).replace(/"/g, '') + '" alt="logo">';
+    } else {
+      el.innerHTML = el.dataset.origHtml;
+    }
+  });
   const tg = $('#footerTelegramLink');
   if (tg) tg.href = s.telegram;
   const yt = $('#footerYoutubeLink');
@@ -1421,6 +1442,9 @@ function fillAdminForm(s) {
   $('#adminSiteName').value = s.siteName;
   $('#adminFooterCredit').value = s.footerCredit;
   $('#adminLogoText').value = s.logoText;
+  $('#adminLogoImage').value = s.logoImage || '';
+  const lp = $('#adminLogoPreview');
+  if (lp) { lp.src = s.logoImage || ''; lp.style.display = s.logoImage ? '' : 'none'; }
   $('#adminProBadgeText').value = s.proBadgeText;
   $('#adminTelegram').value = s.telegram;
   $('#adminYoutube').value = s.youtube;
@@ -2200,6 +2224,7 @@ function bindUI() {
     s.siteName = $('#adminSiteName').value.trim() || DEFAULT_ADMIN.siteName;
     s.footerCredit = $('#adminFooterCredit').value.trim() || DEFAULT_ADMIN.footerCredit;
     s.logoText = $('#adminLogoText').value.trim() || DEFAULT_ADMIN.logoText;
+    s.logoImage = $('#adminLogoImage').value.trim();
     s.proBadgeText = $('#adminProBadgeText').value.trim() || DEFAULT_ADMIN.proBadgeText;
     s.telegram = $('#adminTelegram').value.trim() || DEFAULT_ADMIN.telegram;
     s.youtube = $('#adminYoutube').value.trim() || DEFAULT_ADMIN.youtube;
@@ -2213,6 +2238,27 @@ function bindUI() {
     applyAdminSettings(s);
     toast('Admin settings saved', 'success');
     closeAdmin();
+  });
+  $('#adminLogoFile').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (f.size > 200 * 1024) { toast('Logo is too big — use one under 200 KB', 'error'); return; }
+    const r = new FileReader();
+    r.onload = () => {
+      $('#adminLogoImage').value = r.result;
+      const lp = $('#adminLogoPreview');
+      if (lp) { lp.src = r.result; lp.style.display = ''; }
+    };
+    r.readAsDataURL(f);
+  });
+  $('#adminLogoImage').addEventListener('input', e => {
+    const lp = $('#adminLogoPreview');
+    if (lp) { lp.src = e.target.value.trim(); lp.style.display = e.target.value.trim() ? '' : 'none'; }
+  });
+  $('#adminLogoRemove').addEventListener('click', () => {
+    $('#adminLogoImage').value = '';
+    const lp = $('#adminLogoPreview');
+    if (lp) { lp.src = ''; lp.style.display = 'none'; }
   });
   $('#adminResetBtn').addEventListener('click', () => {
     try { localStorage.removeItem(LS_ADMIN); } catch (e) {}
